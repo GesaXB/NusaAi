@@ -1,0 +1,46 @@
+<!-- Paste this into Supabase Dashboard → Authentication → Email Templates → Confirm signup -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f5; margin: 0; padding: 0; }
+        .container { max-width: 480px; margin: 0 auto; padding: 40px 16px; }
+        .logo { font-size: 20px; font-weight: 800; color: #18181b; text-align: center; padding: 24px 0; letter-spacing: -0.5px; }
+        .logo span { color: #e11d48; }
+        .card { background: #ffffff; border-radius: 24px; padding: 48px 32px; text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,0.04); }
+        .icon-wrap { width: 56px; height: 56px; background: #ecfdf5; border-radius: 16px; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; }
+        .icon-wrap svg { width: 28px; height: 28px; }
+        h2 { color: #18181b; font-size: 22px; margin: 0 0 8px; font-weight: 800; letter-spacing: -0.3px; }
+        .subtitle { color: #71717a; font-size: 14px; line-height: 1.6; margin: 0 0 32px; }
+        .otp-code { display: inline-block; background: #f4f4f5; color: #18181b; font-size: 32px; font-weight: 800; letter-spacing: 8px; padding: 16px 32px; border-radius: 16px; margin: 8px 0 32px; border: 2px dashed #d4d4d8; font-family: 'Courier New', monospace; }
+        .divider { height: 1px; background: #f4f4f5; margin: 32px 0; }
+        .note { color: #a1a1aa; font-size: 12px; line-height: 1.6; }
+        .footer { text-align: center; padding: 24px 0; color: #a1a1aa; font-size: 11px; }
+        .footer a { color: #e11d48; text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">Nusa<span>AI</span></div>
+        <div class="card">
+            <div class="icon-wrap">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#10b981">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+            </div>
+            <h2>Konfirmasi Registrasi</h2>
+            <p class="subtitle">Terima kasih telah mendaftar di NusaAI! Gunakan kode OTP di bawah ini untuk mengaktifkan akun kamu.</p>
+            <div class="otp-code">{{ .Token }}</div>
+            <p class="subtitle" style="margin-bottom: 0;">Masukkan kode ini di halaman verifikasi NusaAI.</p>
+            <div class="divider"></div>
+            <p class="note">Jika kamu tidak merasa mendaftar di NusaAI, abaikan email ini. Kode ini akan kedaluwarsa dalam 24 jam.</p>
+        </div>
+        <div class="footer">
+            &copy; 2026 <a href="https://nusaai.com">NusaAI</a> — Platform Belajar AI #1 di Indonesia
+        </div>
+    </div>
+</body>
+</html>

@@ -55,7 +55,7 @@ export function PromptInput({
         rows={1}
         disabled={isLoading}
         className={cn(
-          "w-full resize-none bg-transparent px-5 pt-4 pb-14 text-[15px] text-zinc-900 placeholder:text-zinc-400",
+          "w-full resize-none bg-transparent px-4 sm:px-5 pt-3.5 sm:pt-4 pb-12 sm:pb-14 text-[14px] sm:text-[15px] text-zinc-900 placeholder:text-zinc-400",
           "focus:outline-none leading-relaxed max-h-40 overflow-y-auto",
           "disabled:opacity-50 break-words"
         )}
@@ -63,7 +63,7 @@ export function PromptInput({
       />
 
       {/* Toolbar */}
-      <div className="absolute bottom-3.5 left-4 right-4 flex items-center justify-between pointer-events-none">
+      <div className="absolute bottom-3 sm:bottom-3.5 left-3 sm:left-4 right-3 sm:right-4 flex items-center justify-between pointer-events-none">
         <div className="flex items-center gap-1.5 pointer-events-auto">
           <button className="p-2 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all border border-transparent hover:border-zinc-100">
             <Paperclip className="w-4 h-4" />

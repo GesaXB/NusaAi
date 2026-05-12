@@ -36,12 +36,19 @@ export function ChatWindow({
   modelId 
 }: ChatWindowProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
-    return () => clearTimeout(timer);
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (messages.length > 0 || isLoading) {
+      const timer = setTimeout(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 80);
+      return () => clearTimeout(timer);
+    }
   }, [messages, isLoading]);
 
   const isEmpty = messages.length === 0;
@@ -49,7 +56,7 @@ export function ChatWindow({
   return (
     <div className="flex flex-col h-full bg-zinc-50/30">
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8 space-y-8 scroll-smooth">
+      <div className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 scroll-smooth">
         <AnimatePresence mode="wait">
           {isEmpty ? (
             <motion.div 
@@ -58,7 +65,7 @@ export function ChatWindow({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.4 }}
-              className="flex flex-col items-center justify-center h-full gap-10 text-center py-10"
+              className="flex flex-col items-center justify-center h-full gap-6 sm:gap-10 text-center py-6 sm:py-10 px-2"
             >
               {/* Welcome */}
               <div className="space-y-4">
@@ -70,7 +77,7 @@ export function ChatWindow({
                 >
                   <Image src="/logo.png" alt="NusaAI" width={32} height={32} />
                 </motion.div>
-                <h2 className="text-3xl font-bold text-zinc-900 tracking-tight">
+                <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 tracking-tight">
                   Halo! Saya NusaAI 👋
                 </h2>
                 <p className="text-zinc-500 max-w-sm mx-auto leading-relaxed">
@@ -79,7 +86,7 @@ export function ChatWindow({
               </div>
 
               {/* Starter prompts */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl px-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full max-w-2xl px-2 sm:px-4">
                 {STARTER_PROMPTS.map((starter, i) => {
                   const Icon = starter.icon;
                   return (
@@ -90,7 +97,7 @@ export function ChatWindow({
                       transition={{ delay: i * 0.1 + 0.3 }}
                       onClick={() => !isLimitReached && onSend(starter.prompt)}
                       disabled={isLimitReached}
-                      className="flex items-start gap-4 p-5 rounded-2xl border border-zinc-100 bg-white hover:border-brand-red/30 hover:shadow-xl hover:shadow-brand-red/5 text-left transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-start gap-3 sm:gap-4 p-4 sm:p-5 rounded-2xl border border-zinc-100 bg-white hover:border-brand-red/30 hover:shadow-xl hover:shadow-brand-red/5 text-left transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <div className="p-2.5 rounded-xl bg-zinc-50 group-hover:bg-brand-red/10 transition-colors flex-shrink-0">
                         <Icon className="w-4 h-4 text-zinc-400 group-hover:text-brand-red transition-colors" />
@@ -164,7 +171,7 @@ export function ChatWindow({
       </div>
 
       {/* Input Area */}
-      <div className="px-4 md:px-8 pb-6 bg-gradient-to-t from-zinc-50/80 to-transparent pt-4">
+      <div className="px-3 sm:px-4 md:px-8 pb-4 sm:pb-6 bg-gradient-to-t from-zinc-50/80 to-transparent pt-3 sm:pt-4">
         <div className="max-w-4xl mx-auto space-y-4">
           {/* Action Toolbar */}
           {!isEmpty && (

@@ -60,10 +60,12 @@ export default function DemoPage() {
   }, [messages]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 80);
-    return () => clearTimeout(timer);
+    if (messages.length > 0 || isLoading) {
+      const timer = setTimeout(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 80);
+      return () => clearTimeout(timer);
+    }
   }, [messages, isLoading]);
 
   const stop = () => {
@@ -136,34 +138,34 @@ export default function DemoPage() {
   return (
     <div className="flex flex-col h-screen bg-zinc-50">
       {/* Minimal Topbar */}
-      <header className="flex items-center justify-between px-6 py-3.5 border-b border-zinc-100 bg-white/80 backdrop-blur-md sticky top-0 z-30">
-        <Link href="/" className="flex items-center gap-2.5">
-          <Image src="/logo.png" alt="NusaAI" width={26} height={26} className="rounded-lg" />
-          <span className="font-bold text-zinc-900 tracking-tight">Nusa<span className="text-brand-red">AI</span></span>
+      <header className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-zinc-100 bg-white/80 backdrop-blur-md sticky top-0 z-30">
+        <Link href="/" className="flex items-center gap-2">
+          <Image src="/logo.png" alt="NusaAI" width={24} height={24} className="rounded-lg" />
+          <span className="font-bold text-sm sm:text-base text-zinc-900 tracking-tight">Nusa<span className="text-brand-red">AI</span></span>
         </Link>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {!isLimitReached && (
-            <div className="hidden sm:flex items-center gap-1.5 bg-zinc-50 border border-zinc-100 rounded-full px-3 py-1">
+            <div className="flex items-center gap-1 sm:gap-1.5 bg-zinc-50 border border-zinc-100 rounded-full px-2 sm:px-3 py-1">
               <div className="flex gap-0.5">
                 {Array.from({ length: LIMIT }).map((_, i) => (
-                  <div key={i} className={`w-2 h-2 rounded-full transition-colors ${i < aiCount ? "bg-brand-red" : "bg-zinc-200"}`} />
+                  <div key={i} className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-colors ${i < aiCount ? "bg-brand-red" : "bg-zinc-200"}`} />
                 ))}
               </div>
-              <span className="text-[10px] font-bold text-zinc-400 ml-1">{aiCount}/{LIMIT} demo</span>
+              <span className="text-[9px] sm:text-[10px] font-bold text-zinc-400 ml-0.5 sm:ml-1">{aiCount}/{LIMIT}</span>
             </div>
           )}
-          <Link href="/login" className="text-xs font-bold text-zinc-600 hover:text-brand-red transition-colors px-3 py-1.5 rounded-lg hover:bg-zinc-50 border border-transparent hover:border-zinc-100">
+          <Link href="/login" className="hidden sm:block text-xs font-bold text-zinc-600 hover:text-brand-red transition-colors px-3 py-1.5 rounded-lg hover:bg-zinc-50 border border-transparent hover:border-zinc-100">
             Masuk
           </Link>
-          <Link href="/login" className="text-xs font-bold bg-zinc-900 text-white px-4 py-2 rounded-xl hover:bg-zinc-800 transition-colors shadow-sm">
+          <Link href="/login" className="text-[11px] sm:text-xs font-bold bg-zinc-900 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl hover:bg-zinc-800 transition-colors shadow-sm">
             Daftar Gratis
           </Link>
         </div>
       </header>
 
       {/* Chat Area */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8 scroll-smooth">
+      <div className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-8 py-6 sm:py-8 scroll-smooth">
         <AnimatePresence mode="wait">
           {isEmpty ? (
             <motion.div
@@ -171,7 +173,7 @@ export default function DemoPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center justify-center min-h-[60vh] gap-10 text-center"
+              className="flex flex-col items-center justify-center min-h-[50vh] sm:min-h-[60vh] gap-6 sm:gap-10 text-center px-2"
             >
               <div className="space-y-4">
                 <motion.div
@@ -183,14 +185,14 @@ export default function DemoPage() {
                   <Image src="/logo.png" alt="NusaAI" width={32} height={32} />
                 </motion.div>
                 <div>
-                  <h2 className="text-3xl font-bold text-zinc-900 tracking-tight mb-2">Halo! Saya NusaAI</h2>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 tracking-tight mb-2">Halo! Saya NusaAI</h2>
                   <p className="text-zinc-500 max-w-sm mx-auto leading-relaxed text-sm">
                     Coba NusaAI secara gratis — kamu mendapat <strong className="text-zinc-900">{LIMIT} percakapan</strong> demo tanpa perlu login.
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full max-w-2xl">
                 {STARTER_PROMPTS.map((s, i) => {
                   const Icon = s.icon;
                   return (
@@ -200,7 +202,7 @@ export default function DemoPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.1 + 0.2 }}
                       onClick={() => send(s.prompt)}
-                      className="flex items-start gap-4 p-5 rounded-2xl border border-zinc-100 bg-white hover:border-brand-red/30 hover:shadow-lg hover:shadow-brand-red/5 text-left transition-all duration-300 group"
+                      className="flex items-start gap-3 sm:gap-4 p-4 sm:p-5 rounded-2xl border border-zinc-100 bg-white hover:border-brand-red/30 hover:shadow-lg hover:shadow-brand-red/5 text-left transition-all duration-300 group"
                     >
                       <div className="p-2.5 rounded-xl bg-zinc-50 group-hover:bg-brand-red/10 transition-colors flex-shrink-0">
                         <Icon className="w-4 h-4 text-zinc-400 group-hover:text-brand-red transition-colors" />

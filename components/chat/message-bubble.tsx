@@ -28,12 +28,12 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
       {/* Avatar */}
       <div className="flex-shrink-0 mt-1">
         {isUser ? (
-          <div className="w-8 h-8 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center text-[10px] font-black text-zinc-400 uppercase tracking-tighter">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center text-[9px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-tighter">
             User
           </div>
         ) : (
-          <div className="w-8 h-8 rounded-xl bg-white border border-zinc-100 flex items-center justify-center overflow-hidden shadow-sm ring-4 ring-zinc-50">
-            <Image src="/logo.png" alt="NusaAI" width={18} height={18} />
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white border border-zinc-100 flex items-center justify-center overflow-hidden shadow-sm ring-2 sm:ring-4 ring-zinc-50">
+            <Image src="/logo.png" alt="NusaAI" width={16} height={16} />
           </div>
         )}
       </div>
@@ -41,7 +41,7 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
       {/* Bubble */}
       <div
         className={cn(
-          "max-w-[85%] sm:max-w-[75%] rounded-2xl px-5 py-3.5 text-[15px] leading-relaxed transition-all duration-300",
+          "max-w-[88%] sm:max-w-[75%] rounded-2xl px-4 sm:px-5 py-3 sm:py-3.5 text-[14px] sm:text-[15px] leading-relaxed transition-all duration-300",
           isUser
             ? "bg-zinc-900 text-white rounded-tr-sm shadow-xl shadow-zinc-200/30 font-medium"
             : "bg-white border border-zinc-100 text-zinc-700 rounded-tl-sm shadow-sm hover:shadow-md hover:border-zinc-200"

@@ -5,6 +5,7 @@ import { BenefitsSection } from "@/components/landing/benefits-section";
 import { DemoSection } from "@/components/landing/demo-section";
 import { BlogSection } from "@/components/landing/blog-section";
 import { CTASection } from "@/components/landing/cta-section";
+import { ScrollToTop } from "@/components/ui/scroll-to-top";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
 export default function LandingPage() {
   return (
     <main className="bg-[#fcfcfc] min-h-screen text-zinc-900">
+      <ScrollToTop />
       <Navbar />
       <HeroSection />
       <FeaturesSection />

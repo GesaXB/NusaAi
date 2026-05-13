@@ -1,6 +1,14 @@
 import { NextRequest } from "next/server";
 import { SYSTEM_PROMPT } from "@/types";
 
+function withServerContext(base: string): string {
+  const iso = new Date().toISOString();
+  const date = iso.slice(0, 10);
+  return `${base}
+
+[Konteks server — sertakan dalam penalaranmu bila relevan: tanggal UTC ${iso}. Kamu dijalankan lewat OpenRouter; pengetahuan factual tetap terbatas pada cut-off pelatihan model yang dipilih (cek kartu model di openrouter.ai, termasuk koleksi free). Jangan mengklaim "data sampai 2026" kecuali itu benar-benar tertera untuk model tersebut.]`;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { messages, modelId, systemPrompt } = await req.json();
@@ -26,11 +34,11 @@ export async function POST(req: NextRequest) {
         model: modelId ?? "deepseek/deepseek-chat",
         stream: true,
         messages: [
-          { role: "system", content: systemPrompt ?? SYSTEM_PROMPT },
+          { role: "system", content: withServerContext(systemPrompt ?? SYSTEM_PROMPT) },
           ...messages,
         ],
-        max_tokens: 1000,
-        temperature: 0.4,
+        max_tokens: 2048,
+        temperature: 0.25,
       }),
     });
 

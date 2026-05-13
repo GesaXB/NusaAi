@@ -5,7 +5,11 @@ import Image from "next/image";
 import { Send, Square } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { generateId } from "@/lib/utils";
+import { createSseDeltaParser } from "@/lib/sse-delta-parser";
+import { createStreamMessageUpdater } from "@/lib/stream-message-updater";
 import Link from "next/link";
+import { MessageBubble } from "@/components/chat/message-bubble";
+import { SYSTEM_PROMPT } from "@/types";
 
 interface PreviewMessage {
   id: string;
@@ -19,20 +23,26 @@ const QUICK_PROMPTS = [
   "Rumus volume bola",
 ];
 
-const PREVIEW_SYSTEM = `You are NusaAI, a concise AI tutor for Indonesian students. 
-RULES: NO EMOJIS. Respond in Bahasa Indonesia. Keep answers under 80 words. Be direct and helpful.`;
-
 export function HeroChatPreview() {
   const [messages, setMessages] = useState<PreviewMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (messages.length > 0 || isLoading) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      requestAnimationFrame(() => {
+        const el = scrollRef.current;
+        if (el) {
+          el.scrollTo({
+            top: el.scrollHeight,
+            behavior: isLoading ? "auto" : "smooth",
+          });
+        }
+      });
     }
   }, [messages, isLoading]);
 
@@ -62,7 +72,7 @@ export function HeroChatPreview() {
         body: JSON.stringify({
           messages: newMessages.map(m => ({ role: m.role, content: m.content })),
           modelId: "meta-llama/llama-3.1-8b-instruct",
-          systemPrompt: PREVIEW_SYSTEM,
+          systemPrompt: SYSTEM_PROMPT,
         }),
       });
 
@@ -73,25 +83,21 @@ export function HeroChatPreview() {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let aiContent = "";
+      const sse = createSseDeltaParser();
+      const stream = createStreamMessageUpdater(setMessages, id);
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
-        for (const line of chunk.split("\n")) {
-          if (!line.startsWith("data: ")) continue;
-          const data = line.slice(6).trim();
-          if (data === "[DONE]") break;
-          try {
-            const delta = JSON.parse(data)?.choices?.[0]?.delta?.content ?? "";
-            if (delta) {
-              aiContent += delta;
-              setMessages(prev => prev.map(m => m.id === id ? { ...m, content: aiContent } : m));
-            }
-          } catch {}
+        for (const d of sse.push(chunk)) {
+          stream.pushDelta(d);
         }
       }
+      for (const d of sse.end()) {
+        stream.pushDelta(d);
+      }
+      stream.finish();
     } catch (err: any) {
       if (err?.name === "AbortError") return;
       setMessages(prev => [...prev, { id: generateId(), role: "assistant", content: "Koneksi gagal. Coba lagi." }]);
@@ -101,7 +107,7 @@ export function HeroChatPreview() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white rounded-3xl border border-zinc-100 shadow-2xl shadow-zinc-200/50 overflow-hidden flex flex-col" style={{ height: "440px" }}>
+    <div className="w-full max-w-2xl mx-auto bg-white rounded-3xl border border-zinc-100 shadow-2xl shadow-zinc-200/50 overflow-hidden flex flex-col min-h-0" style={{ height: "440px" }}>
       {/* Chat header */}
       <div className="flex items-center gap-3 px-5 py-3.5 border-b border-zinc-50 bg-zinc-50/50 flex-shrink-0">
         <div className="w-8 h-8 rounded-xl bg-white border border-zinc-100 flex items-center justify-center shadow-sm">
@@ -119,7 +125,7 @@ export function HeroChatPreview() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4 scroll-smooth">
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-5 py-5 space-y-4 scroll-smooth overscroll-y-contain [-webkit-overflow-scrolling:touch]">
         <AnimatePresence mode="popLayout">
           {messages.length === 0 ? (
             <motion.div
@@ -152,29 +158,16 @@ export function HeroChatPreview() {
                 initial={{ opacity: 0, y: 6, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.25, ease: "easeOut" }}
-                className={`flex gap-2.5 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
+                className="w-full"
               >
-                {msg.role === "assistant" && (
-                  <div className="w-6 h-6 rounded-lg bg-white border border-zinc-100 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
-                    <Image src="/logo.png" alt="NusaAI" width={13} height={13} />
-                  </div>
-                )}
-                <div
-                  className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed break-words ${
-                    msg.role === "user"
-                      ? "bg-zinc-900 text-white rounded-tr-sm font-medium"
-                      : "bg-zinc-50 border border-zinc-100 text-zinc-700 rounded-tl-sm"
-                  }`}
-                >
-                  {msg.content}
-                  {isLoading && i === messages.length - 1 && msg.role === "assistant" && msg.content === "" && (
-                    <span className="inline-flex gap-1 ml-1 items-center">
-                      {[0, 1, 2].map(j => (
-                        <motion.span key={j} animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 0.8, repeat: Infinity, delay: j * 0.15 }} className="w-1 h-1 rounded-full bg-zinc-400 inline-block" />
-                      ))}
-                    </span>
-                  )}
-                </div>
+                <MessageBubble
+                  message={msg}
+                  isStreaming={
+                    isLoading &&
+                    i === messages.length - 1 &&
+                    msg.role === "assistant"
+                  }
+                />
               </motion.div>
             ))
           )}

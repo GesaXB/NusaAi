@@ -3,12 +3,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Menu, X, ArrowRight, LayoutDashboard, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { scrollToHash } from "@/lib/hash-nav";
 
 const NAV_LINKS = [
   { label: "Fitur", href: "#features" },
@@ -16,14 +18,25 @@ const NAV_LINKS = [
   { label: "Blog", href: "/blog" },
 ];
 
-export function Navbar() {
+interface NavbarProps {
+  /** Blog (and similar): always solid white bar; use with top padding on content below fixed header. */
+  variant?: "default" | "solid";
+}
+
+export function Navbar({ variant = "default" }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const solidBar = variant === "solid";
+  const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -45,8 +58,28 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    if (!mobileOpen) {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      document.documentElement.style.overflow = "";
+      return;
+    }
+    const scrollY = window.scrollY;
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      document.documentElement.style.overflow = "";
+      window.scrollTo(0, scrollY);
+    };
   }, [mobileOpen]);
 
   const close = useCallback(() => setMobileOpen(false), []);
@@ -73,10 +106,13 @@ export function Navbar() {
       />
 
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
-            ? "bg-white/90 backdrop-blur-xl shadow-[0_1px_0_0_rgba(0,0,0,0.03)] py-3"
-            : "bg-transparent py-5"
-          }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          solidBar
+            ? "bg-white border-b border-zinc-200/80 shadow-sm py-3.5"
+            : scrolled
+              ? "bg-white/90 backdrop-blur-xl shadow-[0_1px_0_0_rgba(0,0,0,0.03)] py-3"
+              : "bg-transparent py-5"
+        }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 shrink-0">
@@ -89,9 +125,27 @@ export function Navbar() {
           <nav className="hidden md:flex items-center gap-8">
             {NAV_LINKS.map((link) => {
               const isHash = link.href.startsWith("#");
-              const href = isHash && pathname !== "/" ? `/${link.href}` : link.href;
+              const hashHref = isHash ? `/${link.href}` : link.href;
+              if (isHash) {
+                return (
+                  <Link
+                    key={link.label}
+                    href={hashHref}
+                    scroll={false}
+                    onClick={(e) => {
+                      if (pathname === "/") {
+                        e.preventDefault();
+                        scrollToHash(link.href);
+                      }
+                    }}
+                    className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                );
+              }
               return (
-                <Link key={link.label} href={href} className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">
+                <Link key={link.label} href={link.href} className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">
                   {link.label}
                 </Link>
               );
@@ -140,79 +194,119 @@ export function Navbar() {
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
-
-        <AnimatePresence>
-          {mobileOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 top-0 bg-white z-40 flex flex-col md:hidden"
-            >
-              <div className="flex items-center justify-between px-6 py-5">
-                <Link href="/" className="flex items-center gap-2.5" onClick={close}>
-                  <Image src="/logo.png" alt="NusaAI" width={28} height={28} className="rounded-lg" />
-                  <span className="font-bold text-lg text-zinc-900 tracking-tight">
-                    Nusa<span className="text-brand-red">AI</span>
-                  </span>
-                </Link>
-                <button onClick={close} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-zinc-100 transition-colors">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <nav className="flex-1 flex flex-col justify-center px-6 gap-2">
-                {NAV_LINKS.map((link, i) => {
-                  const isHash = link.href.startsWith("#");
-                  const href = isHash && pathname !== "/" ? `/${link.href}` : link.href;
-                  return (
-                    <motion.div key={link.label} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 + 0.1 }}>
-                      <Link href={href} onClick={close} className="block text-3xl font-bold text-zinc-900 hover:text-brand-red py-3 transition-colors">
-                        {link.label}
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-              </nav>
-
-              <div className="px-6 pb-8 flex flex-col gap-3">
-                {user ? (
-                  <>
-                    <Link href="/dashboard" onClick={close}>
-                      <Button className="w-full h-12 rounded-full bg-zinc-900 text-white font-semibold gap-2">
-                        <LayoutDashboard className="w-4 h-4" />
-                        Dashboard
-                      </Button>
-                    </Link>
-                    <button
-                      onClick={() => { close(); setShowLogoutConfirm(true); }}
-                      className="w-full h-12 rounded-full border border-red-100 text-red-500 font-semibold flex items-center justify-center gap-2 hover:bg-red-50 transition-colors"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Keluar
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link href="/login" onClick={close}>
-                      <Button variant="outline" className="w-full h-12 rounded-full border-zinc-200 font-semibold">
-                        Masuk
-                      </Button>
-                    </Link>
-                    <Link href="/demo" onClick={close}>
-                      <Button className="w-full h-12 rounded-full bg-zinc-900 text-white font-semibold gap-2">
-                        Mulai Belajar
-                        <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    </Link>
-                  </>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </header>
+
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {mobileOpen && (
+              <motion.div
+                key="mobile-nav-sheet"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 z-[60] flex flex-col bg-white md:hidden min-h-[100dvh] max-h-[100dvh] overscroll-y-contain"
+              >
+                <div className="flex items-center justify-between px-6 py-5 shrink-0 border-b border-zinc-100/80">
+                  <Link href="/" className="flex items-center gap-2.5" onClick={close}>
+                    <Image src="/logo.png" alt="NusaAI" width={28} height={28} className="rounded-lg" />
+                    <span className="font-bold text-lg text-zinc-900 tracking-tight">
+                      Nusa<span className="text-brand-red">AI</span>
+                    </span>
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={close}
+                    className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-zinc-100 transition-colors"
+                    aria-label="Tutup menu"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <nav className="flex-1 flex flex-col justify-start px-6 gap-1 pt-6 pb-4 min-h-0 overflow-y-auto overscroll-y-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
+                  {NAV_LINKS.map((link, i) => {
+                    const isHash = link.href.startsWith("#");
+                    const hashHref = isHash ? `/${link.href}` : link.href;
+                    return (
+                      <motion.div
+                        key={link.label}
+                        initial={{ opacity: 0, x: -12 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.05 + 0.08 }}
+                      >
+                        {isHash ? (
+                          <Link
+                            href={hashHref}
+                            scroll={false}
+                            onClick={(e) => {
+                              close();
+                              if (pathname === "/") {
+                                e.preventDefault();
+                                scrollToHash(link.href);
+                              }
+                            }}
+                            className="block text-3xl font-bold text-zinc-900 hover:text-brand-red py-3 transition-colors"
+                          >
+                            {link.label}
+                          </Link>
+                        ) : (
+                          <Link
+                            href={link.href}
+                            onClick={close}
+                            className="block text-3xl font-bold text-zinc-900 hover:text-brand-red py-3 transition-colors"
+                          >
+                            {link.label}
+                          </Link>
+                        )}
+                      </motion.div>
+                    );
+                  })}
+                </nav>
+
+                <div className="px-6 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-4 shrink-0 flex flex-col gap-3 border-t border-zinc-100/80 bg-white">
+                  {user ? (
+                    <>
+                      <Link href="/dashboard" onClick={close}>
+                        <Button className="w-full h-12 rounded-full bg-zinc-900 text-white font-semibold gap-2">
+                          <LayoutDashboard className="w-4 h-4" />
+                          Dashboard
+                        </Button>
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          close();
+                          setShowLogoutConfirm(true);
+                        }}
+                        className="w-full h-12 rounded-full border border-red-100 text-red-500 font-semibold flex items-center justify-center gap-2 hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Keluar
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link href="/login" onClick={close}>
+                        <Button variant="outline" className="w-full h-12 rounded-full border-zinc-200 font-semibold">
+                          Masuk
+                        </Button>
+                      </Link>
+                      <Link href="/demo" onClick={close}>
+                        <Button className="w-full h-12 rounded-full bg-zinc-900 text-white font-semibold gap-2">
+                          Mulai Belajar
+                          <ArrowRight className="w-4 h-4" />
+                        </Button>
+                      </Link>
+                    </>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
     </>
   );
 }

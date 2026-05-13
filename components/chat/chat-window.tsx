@@ -36,6 +36,7 @@ export function ChatWindow({
   modelId 
 }: ChatWindowProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef(true);
 
   useEffect(() => {
@@ -44,19 +45,28 @@ export function ChatWindow({
       return;
     }
     if (messages.length > 0 || isLoading) {
-      const timer = setTimeout(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 80);
-      return () => clearTimeout(timer);
+      const id = requestAnimationFrame(() => {
+        const el = scrollRef.current;
+        if (el) {
+          el.scrollTo({
+            top: el.scrollHeight,
+            behavior: isLoading ? "auto" : "smooth",
+          });
+        }
+      });
+      return () => cancelAnimationFrame(id);
     }
   }, [messages, isLoading]);
 
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="flex flex-col h-full bg-zinc-50/30">
+    <div className="flex flex-col h-full min-h-0 bg-zinc-50/30">
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 scroll-smooth">
+      <div
+        ref={scrollRef}
+        className="flex-1 min-h-0 overflow-y-auto px-3 sm:px-4 md:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 scroll-smooth overscroll-y-contain [-webkit-overflow-scrolling:touch]"
+      >
         <AnimatePresence mode="wait">
           {isEmpty ? (
             <motion.div 
@@ -78,7 +88,7 @@ export function ChatWindow({
                   <Image src="/logo.png" alt="NusaAI" width={32} height={32} />
                 </motion.div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 tracking-tight">
-                  Halo! Saya NusaAI 👋
+                  Halo! Saya NusaAI
                 </h2>
                 <p className="text-zinc-500 max-w-sm mx-auto leading-relaxed">
                   Asisten belajar AI untuk pelajar Indonesia. Tanyakan apa saja — saya siap membantu belajarmu hari ini.

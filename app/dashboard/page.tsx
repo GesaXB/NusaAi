@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
 import { ChatWindow } from "@/components/chat/chat-window";
@@ -14,10 +14,35 @@ export default function DashboardPage() {
   const { messages, isLoading, isLimitReached, send, stop, reset } = useChat(modelId);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  useEffect(() => {
+    if (!sidebarOpen) {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      document.documentElement.style.overflow = "";
+      return;
+    }
+    const scrollY = window.scrollY;
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      document.documentElement.style.overflow = "";
+      window.scrollTo(0, scrollY);
+    };
+  }, [sidebarOpen]);
+
   return (
-    <div className="flex h-screen bg-zinc-50 overflow-hidden relative">
+    <div className="flex h-[100dvh] min-h-0 bg-zinc-50 overflow-hidden relative">
       {/* Desktop sidebar */}
-      <div className="hidden md:block">
+      <div className="hidden md:block h-full min-h-0 shrink-0">
         <Sidebar onNewChat={reset} />
       </div>
 
@@ -37,7 +62,7 @@ export default function DashboardPage() {
               animate={{ x: 0 }}
               exit={{ x: -280 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed left-0 top-0 bottom-0 z-50 md:hidden"
+              className="fixed left-0 top-0 bottom-0 z-50 md:hidden w-[min(100%,17rem)] h-[100dvh] max-h-[100dvh] overflow-hidden overscroll-contain shadow-2xl"
             >
               <Sidebar onNewChat={() => { reset(); setSidebarOpen(false); }} />
             </motion.div>
@@ -45,7 +70,7 @@ export default function DashboardPage() {
         )}
       </AnimatePresence>
 
-      <div className="flex flex-col flex-1 min-w-0">
+      <div className="flex flex-col flex-1 min-w-0 min-h-0">
         {/* Topbar with mobile menu button */}
         <div className="flex items-center">
           <button

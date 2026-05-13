@@ -4,6 +4,8 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import type { Message } from "@/types";
 import { generateId } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { createSseDeltaParser } from "@/lib/sse-delta-parser";
+import { createStreamMessageUpdater } from "@/lib/stream-message-updater";
 
 export function useChat(modelId: string) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -116,42 +118,31 @@ export function useChat(modelId: string) {
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
-        let assistantContent = "";
+        const sse = createSseDeltaParser();
+        const stream = createStreamMessageUpdater(setMessages, assistantId);
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
           const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split("\n");
-          
-          for (const line of lines) {
-            if (!line.startsWith("data: ")) continue;
-            const data = line.slice(6).trim();
-            if (data === "[DONE]") break;
-            
-            try {
-              const json = JSON.parse(data);
-              const delta = json.choices?.[0]?.delta?.content ?? "";
-              if (delta) {
-                assistantContent += delta;
-                setMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === assistantId ? { ...m, content: assistantContent } : m
-                  )
-                );
-              }
-            } catch {
-              // skip malformed SSE lines
-            }
+          const deltas = sse.push(chunk);
+          for (const d of deltas) {
+            stream.pushDelta(d);
           }
         }
+        for (const d of sse.end()) {
+          stream.pushDelta(d);
+        }
+        stream.finish();
       } catch (err: unknown) {
         if (err instanceof Error && err.name === "AbortError") return;
         
-        let errorMessage = "⚠️ Maaf, terjadi kesalahan koneksi. Silakan coba lagi.";
+        let errorMessage =
+          "Maaf, terjadi kesalahan koneksi. Silakan coba lagi.";
         if (err instanceof Error && err.message.includes("429")) {
-          errorMessage = "⚠️ Server sedang sibuk (Rate limit). Mohon tunggu beberapa detik sebelum mencoba lagi.";
+          errorMessage =
+            "Server sedang sibuk (rate limit). Mohon tunggu beberapa detik sebelum mencoba lagi.";
         }
         
         setMessages((prev) => [

@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/landing/navbar";
+import { HashScrollOnMount } from "@/components/landing/hash-scroll-on-mount";
 import { HeroSection } from "@/components/landing/hero-section";
 import { FeaturesSection } from "@/components/landing/features-section";
 import { BenefitsSection } from "@/components/landing/benefits-section";
@@ -18,6 +19,7 @@ export default function LandingPage() {
   return (
     <main className="bg-[#fcfcfc] min-h-screen text-zinc-900">
       <ScrollToTop />
+      <HashScrollOnMount />
       <Navbar />
       <HeroSection />
       <FeaturesSection />

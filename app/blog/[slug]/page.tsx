@@ -13,19 +13,20 @@ function BlogContent({ post }: { post: BlogPost }) {
 
   return (
     <main className="bg-white min-h-screen">
-      <Navbar />
+      <Navbar variant="solid" />
 
+      <div className="pt-16 md:pt-[4.5rem]">
       {/* Hero Image */}
       <div className="relative w-full h-[50vh] md:h-[60vh] overflow-hidden bg-zinc-950">
         <img
           src={post.image}
           alt={post.title}
-          className="w-full h-full object-cover opacity-50"
+          className="w-full h-full object-cover opacity-90"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/30 to-transparent" />
 
         {/* Back button */}
-        <div className="absolute top-28 left-0 right-0 px-6">
+        <div className="absolute top-6 left-0 right-0 px-6 md:top-8">
           <div className="max-w-4xl mx-auto">
             <Link
               href="/blog"
@@ -217,6 +218,7 @@ function BlogContent({ post }: { post: BlogPost }) {
       )}
 
       <CTASection />
+      </div>
     </main>
   );
 }
@@ -234,8 +236,9 @@ export default function BlogDetailPage() {
   if (!post) {
     return (
       <main className="bg-white min-h-screen">
-        <Navbar />
-        <div className="flex flex-col items-center justify-center min-h-[70vh] px-6">
+        <Navbar variant="solid" />
+        <div className="pt-16 md:pt-[4.5rem] px-6">
+        <div className="flex flex-col items-center justify-center min-h-[70vh]">
           <h1 className="text-3xl font-bold text-zinc-900 mb-4">
             Artikel tidak ditemukan
           </h1>
@@ -249,6 +252,7 @@ export default function BlogDetailPage() {
             <ArrowLeft className="w-4 h-4" />
             Kembali ke Blog
           </Link>
+        </div>
         </div>
       </main>
     );

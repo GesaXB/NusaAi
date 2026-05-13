@@ -57,7 +57,7 @@ const STATS = [
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-24 md:py-32 bg-white overflow-hidden">
+    <section id="features" className="scroll-mt-28 py-24 md:py-32 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
         <div className="max-w-2xl mb-16">

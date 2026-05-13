@@ -2,41 +2,57 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Bot, User, Send } from "lucide-react";
+import { Send } from "lucide-react";
+import { MessageBubble, TypingIndicator } from "@/components/chat/message-bubble";
+import type { Message } from "@/types";
 
-const CHAT_MESSAGES = [
+const CHAT_MESSAGES: Message[] = [
   {
-    role: "user" as const,
-    text: "Jelaskan tentang fotosintesis dengan bahasa yang mudah dipahami",
+    id: "land-u1",
+    role: "user",
+    content: "Jelaskan tentang fotosintesis dengan bahasa yang mudah dipahami",
   },
   {
-    role: "ai" as const,
-    text: "Fotosintesis itu seperti \"memasak\" yang dilakukan oleh tumbuhan 🌱\n\nBahan-bahannya:\n• Cahaya matahari ☀️ (sebagai energi)\n• Air (H₂O) dari akar\n• Karbon dioksida (CO₂) dari udara\n\nHasilnya:\n• Glukosa (C₆H₁₂O₆) — makanan bagi tumbuhan\n• Oksigen (O₂) — yang kita hirup!\n\nProses ini terjadi di kloroplas, tepatnya di bagian yang mengandung klorofil (pigmen hijau). Makanya daun berwarna hijau! 🍃",
+    id: "land-a1",
+    role: "assistant",
+    content: `## Konsep Fotosintesis
+
+Fotosintesis adalah proses kimia pada tumbuhan, alga, dan beberapa bakteri untuk mengubah cahaya menjadi energi kimia yang disimpan dalam glukosa.
+
+### Proses Fotosintesis
+
+- **Penyerapan cahaya:** Klorofil menangkap energi cahaya matahari.
+- **Konversi energi:** Energi cahaya diubah menjadi ATP dan NADPH.
+- **Ikatan CO₂ dan H₂O:** Karbon dioksida dari udara dan air dari akar dipakai dalam reaksi gelap.
+- **Hasil:** Terbentuk glukosa sebagai cadangan energi dan oksigen dilepas ke udara.
+
+### Reaksi Fotosintesis
+
+\`6 CO₂ + 6 H₂O + cahaya → C₆H₁₂O₆ (glukosa) + 6 O₂\`
+
+### Faktor-Faktor Fotosintesis
+
+- **Cahaya:** Intensitas dan durasi cahaya memengaruhi laju fotosintesis.
+- **Suhu:** Enzim bekerja optimal pada rentang suhu tertentu.
+- **Air dan CO₂:** Ketersediaan bahan baku membatasi hasil akhir.`,
   },
   {
-    role: "user" as const,
-    text: "Bisa buatkan rumusnya?",
+    id: "land-u2",
+    role: "user",
+    content: "Bisa buatkan rumusnya?",
   },
   {
-    role: "ai" as const,
-    text: "Tentu! Ini rumus reaksi fotosintesis:\n\n6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂\n           (cahaya + klorofil)\n\nArtinya: 6 molekul karbon dioksida + 6 molekul air, dengan bantuan cahaya & klorofil, menghasilkan 1 molekul glukosa + 6 molekul oksigen.",
+    id: "land-a2",
+    role: "assistant",
+    content: `## Rumus Reaksi
+
+Persamaan ringkas fotosintesis:
+
+\`6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂\`
+
+Di bawah pengaruh cahaya dan klorofil, enam molekul karbon dioksida dan enam molekul air menghasilkan satu molekul glukosa dan enam molekul oksigen.`,
   },
 ];
-
-function TypingDots() {
-  return (
-    <div className="flex items-center gap-1 px-4 py-3">
-      {[0, 1, 2].map((i) => (
-        <motion.div
-          key={i}
-          className="w-1.5 h-1.5 rounded-full bg-zinc-400"
-          animate={{ opacity: [0.3, 1, 0.3] }}
-          transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
-        />
-      ))}
-    </div>
-  );
-}
 
 export function DemoSection() {
   const [visibleCount, setVisibleCount] = useState(0);
@@ -45,7 +61,7 @@ export function DemoSection() {
   useEffect(() => {
     if (visibleCount >= CHAT_MESSAGES.length) return;
 
-    const delay = CHAT_MESSAGES[visibleCount]?.role === "ai" ? 1200 : 600;
+    const delay = CHAT_MESSAGES[visibleCount]?.role === "assistant" ? 1200 : 600;
 
     setIsTyping(true);
     const timer = setTimeout(() => {
@@ -57,7 +73,7 @@ export function DemoSection() {
   }, [visibleCount]);
 
   return (
-    <section id="demo" className="py-24 md:py-32 bg-zinc-50">
+    <section id="demo" className="scroll-mt-28 py-24 md:py-32 bg-zinc-50">
       <div className="max-w-7xl mx-auto px-6">
         <div className="max-w-2xl mb-14">
           <motion.p
@@ -79,7 +95,6 @@ export function DemoSection() {
           </motion.h2>
         </div>
 
-        {/* Chat Preview Window */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -88,7 +103,6 @@ export function DemoSection() {
           className="max-w-3xl mx-auto"
         >
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-xl shadow-zinc-200/40 overflow-hidden">
-            {/* Window Bar */}
             <div className="flex items-center gap-2 px-5 py-3.5 border-b border-zinc-100 bg-zinc-50/80">
               <div className="flex gap-1.5">
                 <div className="w-3 h-3 rounded-full bg-zinc-200" />
@@ -96,61 +110,29 @@ export function DemoSection() {
                 <div className="w-3 h-3 rounded-full bg-zinc-200" />
               </div>
               <div className="flex-1 flex items-center justify-center">
-                <span className="text-xs font-medium text-zinc-400">
-                  NusaAI Chat
-                </span>
+                <span className="text-xs font-medium text-zinc-400">NusaAI Chat</span>
               </div>
               <div className="w-12" />
             </div>
 
-            {/* Messages */}
-            <div className="p-5 md:p-8 space-y-5 min-h-[400px] max-h-[520px] overflow-y-auto">
-              {CHAT_MESSAGES.slice(0, visibleCount).map((msg, i) => (
+            <div className="p-5 md:p-8 space-y-6 min-h-[400px] max-h-[520px] overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
+              {CHAT_MESSAGES.slice(0, visibleCount).map((msg) => (
                 <motion.div
-                  key={i}
+                  key={msg.id}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
-                  className={`flex gap-3 ${
-                    msg.role === "user" ? "justify-end" : "justify-start"
-                  }`}
+                  className="w-full"
                 >
-                  {msg.role === "ai" && (
-                    <div className="w-8 h-8 rounded-full bg-brand-red/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <Bot className="w-4 h-4 text-brand-red" />
-                    </div>
-                  )}
-                  <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-line ${
-                      msg.role === "user"
-                        ? "bg-zinc-900 text-white rounded-br-md"
-                        : "bg-zinc-50 text-zinc-700 border border-zinc-100 rounded-bl-md"
-                    }`}
-                  >
-                    {msg.text}
-                  </div>
-                  {msg.role === "user" && (
-                    <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center shrink-0 mt-0.5">
-                      <User className="w-4 h-4 text-zinc-500" />
-                    </div>
-                  )}
+                  <MessageBubble message={msg} />
                 </motion.div>
               ))}
 
-              {/* Typing indicator */}
               {isTyping && visibleCount < CHAT_MESSAGES.length && (
-                <div className="flex gap-3 justify-start">
-                  <div className="w-8 h-8 rounded-full bg-brand-red/10 flex items-center justify-center shrink-0">
-                    <Bot className="w-4 h-4 text-brand-red" />
-                  </div>
-                  <div className="bg-zinc-50 border border-zinc-100 rounded-2xl rounded-bl-md">
-                    <TypingDots />
-                  </div>
-                </div>
+                <TypingIndicator />
               )}
             </div>
 
-            {/* Input Bar */}
             <div className="px-5 md:px-8 pb-5 md:pb-8">
               <div className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
                 <span className="flex-1 text-sm text-zinc-400">

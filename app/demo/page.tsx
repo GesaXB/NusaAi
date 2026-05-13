@@ -8,18 +8,12 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { generateId } from "@/lib/utils";
+import { createSseDeltaParser } from "@/lib/sse-delta-parser";
+import { createStreamMessageUpdater } from "@/lib/stream-message-updater";
 import type { Message } from "@/types";
+import { SYSTEM_PROMPT } from "@/types";
 
 const FREE_MODEL = "meta-llama/llama-3.1-8b-instruct";
-
-const SYSTEM_PROMPT = `You are NusaAI, a professional AI assistant.
-
-STRICT RULES:
-1. NO EMOJIS.
-2. Be concise, accurate, and helpful — both for educational and general topics.
-3. Default language is Bahasa Indonesia unless the user writes in another language.
-4. Use clean markdown formatting (bold, lists, code blocks).
-5. Do not add fluff or unnecessary filler sentences.`;
 
 const STARTER_PROMPTS = [
   { icon: BookOpen, label: "Jelaskan konsep dasar", prompt: "Jelaskan konsep dasar kalkulus dengan cara yang mudah dipahami" },
@@ -36,6 +30,7 @@ export default function DemoPage() {
   const [aiCount, setAiCount] = useState(0); // count AI responses
   const abortRef = useRef<AbortController | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const isLimitReached = aiCount >= LIMIT;
   const isEmpty = messages.length === 0;
@@ -61,10 +56,16 @@ export default function DemoPage() {
 
   useEffect(() => {
     if (messages.length > 0 || isLoading) {
-      const timer = setTimeout(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 80);
-      return () => clearTimeout(timer);
+      const id = requestAnimationFrame(() => {
+        const el = scrollRef.current;
+        if (el) {
+          el.scrollTo({
+            top: el.scrollHeight,
+            behavior: isLoading ? "auto" : "smooth",
+          });
+        }
+      });
+      return () => cancelAnimationFrame(id);
     }
   }, [messages, isLoading]);
 
@@ -104,25 +105,21 @@ export default function DemoPage() {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let content = "";
+      const sse = createSseDeltaParser();
+      const stream = createStreamMessageUpdater(setMessages, assistantId);
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
-        for (const line of chunk.split("\n")) {
-          if (!line.startsWith("data: ")) continue;
-          const data = line.slice(6).trim();
-          if (data === "[DONE]") break;
-          try {
-            const delta = JSON.parse(data)?.choices?.[0]?.delta?.content ?? "";
-            if (delta) {
-              content += delta;
-              setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content } : m));
-            }
-          } catch {}
+        for (const d of sse.push(chunk)) {
+          stream.pushDelta(d);
         }
       }
+      for (const d of sse.end()) {
+        stream.pushDelta(d);
+      }
+      stream.finish();
     } catch (err: any) {
       if (err?.name === "AbortError") return;
       setMessages(prev => [...prev, {
@@ -136,7 +133,7 @@ export default function DemoPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-zinc-50">
+    <div className="flex flex-col h-screen min-h-0 bg-zinc-50">
       {/* Minimal Topbar */}
       <header className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-zinc-100 bg-white/80 backdrop-blur-md sticky top-0 z-30">
         <Link href="/" className="flex items-center gap-2">
@@ -165,7 +162,7 @@ export default function DemoPage() {
       </header>
 
       {/* Chat Area */}
-      <div className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-8 py-6 sm:py-8 scroll-smooth">
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-3 sm:px-4 md:px-8 py-6 sm:py-8 scroll-smooth overscroll-y-contain [-webkit-overflow-scrolling:touch]">
         <AnimatePresence mode="wait">
           {isEmpty ? (
             <motion.div

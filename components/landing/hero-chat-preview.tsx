@@ -71,7 +71,7 @@ export function HeroChatPreview() {
         signal: abortRef.current.signal,
         body: JSON.stringify({
           messages: newMessages.map(m => ({ role: m.role, content: m.content })),
-          modelId: "meta-llama/llama-3.1-8b-instruct",
+          modelId: "deepseek/deepseek-v4-flash:free",
           systemPrompt: SYSTEM_PROMPT,
         }),
       });
@@ -111,7 +111,7 @@ export function HeroChatPreview() {
       {/* Chat header */}
       <div className="flex items-center gap-3 px-5 py-3.5 border-b border-zinc-50 bg-zinc-50/50 flex-shrink-0">
         <div className="w-8 h-8 rounded-xl bg-white border border-zinc-100 flex items-center justify-center shadow-sm">
-          <Image src="/logo.png" alt="NusaAI" width={18} height={18} />
+          <Image src="/logo.svg" alt="NusaAI" width={18} height={18} />
         </div>
         <div>
           <p className="text-xs font-bold text-zinc-900 leading-none">NusaAI</p>
@@ -136,7 +136,7 @@ export function HeroChatPreview() {
               className="flex flex-col items-center justify-center h-full gap-5 text-center"
             >
               <div className="w-12 h-12 bg-zinc-50 border border-zinc-100 rounded-2xl flex items-center justify-center">
-                <Image src="/logo.png" alt="NusaAI" width={24} height={24} />
+                <Image src="/logo.svg" alt="NusaAI" width={24} height={24} />
               </div>
               <p className="text-sm text-zinc-500 font-medium">Coba tanya sesuatu, atau pilih topik:</p>
               <div className="flex flex-wrap justify-center gap-2">

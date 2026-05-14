@@ -13,7 +13,7 @@ import { createStreamMessageUpdater } from "@/lib/stream-message-updater";
 import type { Message } from "@/types";
 import { SYSTEM_PROMPT } from "@/types";
 
-const FREE_MODEL = "meta-llama/llama-3.1-8b-instruct";
+const FREE_MODEL = "deepseek/deepseek-v4-flash:free";
 
 const STARTER_PROMPTS = [
   { icon: BookOpen, label: "Jelaskan konsep dasar", prompt: "Jelaskan konsep dasar kalkulus dengan cara yang mudah dipahami" },
@@ -133,11 +133,11 @@ export default function DemoPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen min-h-0 bg-zinc-50">
+    <div className="flex flex-col h-screen min-h-0 bg-white">
       {/* Minimal Topbar */}
       <header className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-zinc-100 bg-white/80 backdrop-blur-md sticky top-0 z-30">
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.png" alt="NusaAI" width={24} height={24} className="rounded-lg" />
+          <Image src="/logo.svg" alt="NusaAI" width={24} height={24} className="rounded-lg" />
           <span className="font-bold text-sm sm:text-base text-zinc-900 tracking-tight">Nusa<span className="text-brand-red">AI</span></span>
         </Link>
 
@@ -162,7 +162,7 @@ export default function DemoPage() {
       </header>
 
       {/* Chat Area */}
-      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-3 sm:px-4 md:px-8 py-6 sm:py-8 scroll-smooth overscroll-y-contain [-webkit-overflow-scrolling:touch]">
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-3 sm:px-4 md:px-8 py-6 sm:py-8 space-y-4 sm:space-y-6 scroll-smooth overscroll-y-contain [-webkit-overflow-scrolling:touch]">
         <AnimatePresence mode="wait">
           {isEmpty ? (
             <motion.div
@@ -179,7 +179,7 @@ export default function DemoPage() {
                   transition={{ type: "spring", stiffness: 200, damping: 15 }}
                   className="w-16 h-16 rounded-2xl bg-white border border-zinc-100 shadow-sm flex items-center justify-center mx-auto ring-8 ring-white/50"
                 >
-                  <Image src="/logo.png" alt="NusaAI" width={32} height={32} />
+                  <Image src="/logo.svg" alt="NusaAI" width={32} height={32} />
                 </motion.div>
                 <div>
                   <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 tracking-tight mb-2">Halo! Saya NusaAI</h2>
@@ -218,7 +218,7 @@ export default function DemoPage() {
               key="chat"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="max-w-3xl mx-auto w-full space-y-8"
+              className="max-w-3xl mx-auto w-full space-y-6"
             >
               <AnimatePresence mode="popLayout">
                 {messages.map((msg, i) => (
@@ -272,7 +272,7 @@ export default function DemoPage() {
       </div>
 
       {/* Input */}
-      <div className="px-4 md:px-8 pb-6 pt-3 bg-gradient-to-t from-zinc-50 to-transparent">
+      <div className="px-4 md:px-8 pb-6 pt-3 bg-linear-to-t from-white to-transparent">
         <div className="max-w-3xl mx-auto space-y-2">
           <div className={isLimitReached ? "opacity-40 pointer-events-none" : ""}>
             <PromptInput

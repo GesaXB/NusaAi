@@ -11,7 +11,10 @@ if (!connectionString) {
   throw new Error("DATABASE_URL is not defined in environment variables");
 }
 
-const pool = new Pool({ connectionString });
+const pool = new Pool({ 
+  connectionString: connectionString.replace('?sslmode=require', ''),
+  ssl: { rejectUnauthorized: false }
+});
 const adapter = new PrismaPg(pool);
 
 export const prisma =

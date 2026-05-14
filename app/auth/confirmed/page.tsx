@@ -33,7 +33,7 @@ export default function ConfirmedPage() {
         </div>
 
         <div className="flex items-center justify-center gap-3 py-4 px-4 bg-zinc-50 rounded-2xl border border-zinc-100">
-          <Image src="/logo.png" alt="NusaAI" width={28} height={28} className="rounded-lg" />
+          <Image src="/logo.svg" alt="NusaAI" width={28} height={28} className="rounded-lg" />
           <span className="font-bold text-zinc-900 tracking-tight">
             Nusa<span className="text-brand-red">AI</span>
           </span>

@@ -116,7 +116,7 @@ export function Navbar({ variant = "default" }: NavbarProps) {
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 shrink-0">
-            <Image src="/logo.png" alt="NusaAI" width={28} height={28} className="rounded-lg" />
+            <Image src="/logo.svg" alt="NusaAI" width={28} height={28} className="rounded-lg" />
             <span className="font-bold text-lg text-zinc-900 tracking-tight">
               Nusa<span className="text-brand-red">AI</span>
             </span>
@@ -210,7 +210,7 @@ export function Navbar({ variant = "default" }: NavbarProps) {
               >
                 <div className="flex items-center justify-between px-6 py-5 shrink-0 border-b border-zinc-100/80">
                   <Link href="/" className="flex items-center gap-2.5" onClick={close}>
-                    <Image src="/logo.png" alt="NusaAI" width={28} height={28} className="rounded-lg" />
+                    <Image src="/logo.svg" alt="NusaAI" width={28} height={28} className="rounded-lg" />
                     <span className="font-bold text-lg text-zinc-900 tracking-tight">
                       Nusa<span className="text-brand-red">AI</span>
                     </span>

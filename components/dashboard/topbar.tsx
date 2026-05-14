@@ -7,15 +7,17 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Menu } from "lucide-react";
 
 interface TopbarProps {
   modelId: string;
   onModelChange: (id: string) => void;
   userAvatar?: string | null;
   userName?: string | null;
+  onMenuClick?: () => void;
 }
 
-export function Topbar({ modelId, onModelChange, userAvatar, userName }: TopbarProps) {
+export function Topbar({ modelId, onModelChange, userAvatar, userName, onMenuClick }: TopbarProps) {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -39,10 +41,18 @@ export function Topbar({ modelId, onModelChange, userAvatar, userName }: TopbarP
         onCancel={() => setShowLogoutConfirm(false)}
       />
 
-      <header className="flex items-center justify-between px-3 sm:px-6 py-2.5 sm:py-3.5 border-b border-zinc-100 bg-white/80 backdrop-blur-md sticky top-0 z-30">
+      <header className="flex items-center justify-between px-3 sm:px-6 py-2 sm:py-3 border-b border-zinc-100 bg-white/80 backdrop-blur-md sticky top-0 z-30">
         <div className="flex items-center gap-2 sm:gap-4">
+          {onMenuClick && (
+            <button
+              onClick={onMenuClick}
+              className="md:hidden p-2 rounded-xl text-zinc-500 hover:bg-zinc-50 transition-all flex-shrink-0"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          )}
           <div className="flex items-center gap-2">
-            <Image src="/logo.png" alt="NusaAI" width={20} height={20} className="rounded-lg shadow-sm sm:w-[22px] sm:h-[22px]" />
+            <Image src="/logo.svg" alt="NusaAI" width={20} height={20} className="rounded-lg shadow-sm sm:w-[22px] sm:h-[22px]" />
             <span className="text-xs sm:text-sm font-bold text-zinc-900 tracking-tight">Nusa<span className="text-brand-red">AI</span></span>
           </div>
           

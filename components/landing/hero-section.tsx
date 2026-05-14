@@ -121,7 +121,7 @@ export function HeroSection() {
               className="bg-white p-4 rounded-3xl shadow-xl shadow-zinc-200/50 border border-zinc-100 w-64"
             >
               <div className="flex items-center gap-3 mb-2">
-                <Image src="/logo.png" alt="NusaAI" width={28} height={28} className="rounded-lg" />
+                <Image src="/logo.svg" alt="NusaAI" width={28} height={28} className="rounded-lg" />
                 <span className="font-bold text-xs">NusaAI Assistant</span>
               </div>
               <p className="text-[11px] text-zinc-500 leading-relaxed">

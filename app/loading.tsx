@@ -20,7 +20,7 @@ export default function GlobalLoading() {
           <div className="absolute inset-[-20px] rounded-[2rem] bg-brand-red/10 blur-2xl" aria-hidden />
           <div className="relative flex h-24 w-24 items-center justify-center rounded-[1.75rem] border border-zinc-100 bg-white shadow-lg shadow-zinc-200/60 ring-4 ring-zinc-50">
             <Image
-              src="/logo.png"
+              src="/logo.svg"
               alt="NusaAI"
               width={72}
               height={72}

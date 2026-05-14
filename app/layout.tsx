@@ -18,6 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://nusa-ai.com"),
   title: {
     default: "NusaAI — Platform Belajar AI #1 untuk Pelajar Indonesia",
     template: "%s | NusaAI",
@@ -34,11 +35,16 @@ export const metadata: Metadata = {
     "kurikulum merdeka",
     "belajar online",
     "AI pendidikan",
+    "belajar efektif",
   ],
   authors: [{ name: "NusaAI Team", url: "https://nusa-ai.com" }],
   creator: "NusaAI",
   publisher: "NusaAI",
-  metadataBase: new URL("https://nusa-ai.com"),
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   openGraph: {
     title: "NusaAI — Platform Belajar AI #1 untuk Pelajar Indonesia",
     description:
@@ -49,7 +55,7 @@ export const metadata: Metadata = {
     url: "https://nusa-ai.com",
     images: [
       {
-        url: "/logo.png",
+        url: "/logo.svg",
         width: 512,
         height: 512,
         alt: "NusaAI Logo",
@@ -60,8 +66,9 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "NusaAI — Platform Belajar AI #1 untuk Pelajar Indonesia",
     description:
-      "Upload materi, tanya AI tutor cerdas, buat quiz otomatis. Belajar jadi 4x lebih cepat.",
-    images: ["/logo.png"],
+      "Upload materi, tanya AI tutor cerdas, buat quiz otomatis. Belajar jadi 4x lebih cepat dengan NusaAI.",
+    creator: "@nusa_ai",
+    images: ["/logo.svg"],
   },
   robots: {
     index: true,
@@ -75,8 +82,9 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
+    icon: "/logo.svg",
+    shortcut: "/logo.svg",
+    apple: "/logo.svg",
   },
 };
 

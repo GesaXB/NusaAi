@@ -66,7 +66,7 @@ export default function ResetPasswordPage() {
         <div className="rounded-2xl border border-zinc-200/80 bg-white p-8 sm:p-9 shadow-[0_20px_50px_-24px_rgba(0,0,0,0.12)]">
           <div className="mb-8 text-center">
             <Link href="/" className="inline-flex items-center justify-center gap-2.5">
-              <Image src="/logo.png" alt="NusaAI" width={32} height={32} className="rounded-lg" />
+              <Image src="/logo.svg" alt="NusaAI" width={32} height={32} className="rounded-lg" />
               <span className="text-lg font-bold tracking-tight text-zinc-900">
                 Nusa<span className="text-brand-red">AI</span>
               </span>

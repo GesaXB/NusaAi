@@ -77,7 +77,7 @@ export function CTASection() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-12 md:gap-8 mb-24">
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2.5 mb-8">
-              <Image src="/logo.png" alt="NusaAI" width={32} height={32} className="rounded-lg" />
+              <Image src="/logo.svg" alt="NusaAI" width={32} height={32} className="rounded-lg" />
               <span className="font-bold text-xl text-zinc-900 tracking-tight">Nusa<span className="text-brand-red">AI</span></span>
             </Link>
             <p className="text-zinc-500 text-sm leading-relaxed max-w-xs mb-8">

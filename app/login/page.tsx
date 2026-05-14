@@ -443,7 +443,7 @@ export default function LoginPage() {
             <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <div className="text-center mb-10">
                 <Link href="/" className="inline-flex items-center gap-2.5 mb-8">
-                  <Image src="/logo.png" alt="NusaAI" width={32} height={32} className="rounded-lg" />
+                  <Image src="/logo.svg" alt="NusaAI" width={32} height={32} className="rounded-lg" />
                   <span className="text-xl font-bold text-zinc-900 tracking-tight">Nusa<span className="text-brand-red">AI</span></span>
                 </Link>
                 <h1 className="text-2xl font-extrabold text-zinc-900">

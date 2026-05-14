@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { MessageBubble, TypingIndicator } from "@/components/chat/message-bubble";
 import { PromptInput } from "@/components/chat/prompt-input";
-import { BookOpen, FileText, Brain, Sparkles, Trash2, Lock, ArrowRight } from "lucide-react";
+import { BookOpen, FileText, Brain, Sparkles, Trash2, Lock, ArrowRight, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -17,6 +17,8 @@ interface ChatWindowProps {
   onStop?: () => void;
   onClear?: () => void;
   modelId: string;
+  onEdit?: (messageId: string, content: string) => void;
+  onRegenerate?: (messageId?: string) => void;
 }
 
 const STARTER_PROMPTS = [
@@ -33,11 +35,14 @@ export function ChatWindow({
   onSend, 
   onStop,
   onClear, 
-  modelId 
+  modelId,
+  onEdit,
+  onRegenerate
 }: ChatWindowProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef(true);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -61,11 +66,11 @@ export function ChatWindow({
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="flex flex-col h-full min-h-0 bg-zinc-50/30">
+    <div className="flex flex-col h-full min-h-0 bg-white">
       {/* Messages area */}
       <div
         ref={scrollRef}
-        className="flex-1 min-h-0 overflow-y-auto px-3 sm:px-4 md:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 scroll-smooth overscroll-y-contain [-webkit-overflow-scrolling:touch]"
+        className="flex-1 min-h-0 overflow-y-auto px-3 sm:px-4 md:px-8 py-6 sm:py-8 space-y-4 sm:space-y-6 scroll-smooth overscroll-y-contain [-webkit-overflow-scrolling:touch]"
       >
         <AnimatePresence mode="wait">
           {isEmpty ? (
@@ -85,7 +90,7 @@ export function ChatWindow({
                   transition={{ type: "spring", stiffness: 200, damping: 15 }}
                   className="w-16 h-16 rounded-2xl bg-white border border-zinc-100 shadow-sm flex items-center justify-center mx-auto mb-6 ring-8 ring-white/50"
                 >
-                  <Image src="/logo.png" alt="NusaAI" width={32} height={32} />
+                  <Image src="/logo.svg" alt="NusaAI" width={32} height={32} />
                 </motion.div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 tracking-tight">
                   Halo! Saya NusaAI
@@ -109,7 +114,7 @@ export function ChatWindow({
                       disabled={isLimitReached}
                       className="flex items-start gap-3 sm:gap-4 p-4 sm:p-5 rounded-2xl border border-zinc-100 bg-white hover:border-brand-red/30 hover:shadow-xl hover:shadow-brand-red/5 text-left transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <div className="p-2.5 rounded-xl bg-zinc-50 group-hover:bg-brand-red/10 transition-colors flex-shrink-0">
+                      <div className="p-2.5 rounded-xl bg-zinc-50 group-hover:bg-brand-red/10 transition-colors shrink-0">
                         <Icon className="w-4 h-4 text-zinc-400 group-hover:text-brand-red transition-colors" />
                       </div>
                       <div>
@@ -126,7 +131,7 @@ export function ChatWindow({
               key="chat"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="max-w-4xl mx-auto w-full space-y-8"
+              className="max-w-3xl mx-auto w-full space-y-6"
             >
               <AnimatePresence mode="popLayout">
                 {messages.map((msg, i) => (
@@ -134,6 +139,8 @@ export function ChatWindow({
                     key={msg.id}
                     message={msg}
                     isStreaming={isLoading && i === messages.length - 1 && msg.role === "assistant"}
+                    onEdit={onEdit}
+                    onRegenerate={onRegenerate}
                   />
                 ))}
               </AnimatePresence>
@@ -181,8 +188,8 @@ export function ChatWindow({
       </div>
 
       {/* Input Area */}
-      <div className="px-3 sm:px-4 md:px-8 pb-4 sm:pb-6 bg-gradient-to-t from-zinc-50/80 to-transparent pt-3 sm:pt-4">
-        <div className="max-w-4xl mx-auto space-y-4">
+      <div className="px-3 sm:px-4 md:px-8 pb-4 sm:pb-6 bg-linear-to-t from-zinc-50/80 to-transparent pt-3 sm:pt-4">
+        <div className="max-w-3xl mx-auto space-y-4">
           {/* Action Toolbar */}
           {!isEmpty && (
             <motion.div 
@@ -200,7 +207,7 @@ export function ChatWindow({
               </div>
               {!isLimitReached && (
                 <button
-                  onClick={onClear}
+                  onClick={() => setShowDeleteConfirm(true)}
                   className="flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-red-500 transition-all bg-white hover:bg-red-50 px-3.5 py-1.5 rounded-xl border border-zinc-100 hover:border-red-100 shadow-sm"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -223,6 +230,52 @@ export function ChatWindow({
           </p>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowDeleteConfirm(false)}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-zinc-100 text-center"
+            >
+              <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <AlertCircle className="w-8 h-8 text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold text-zinc-900 mb-2">Hapus Chat Ini?</h3>
+              <p className="text-zinc-500 text-sm mb-8">
+                Tindakan ini akan menghapus seluruh percakapan ini secara permanen dari riwayat kamu.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 px-4 py-3 rounded-xl bg-zinc-50 hover:bg-zinc-100 text-zinc-600 font-bold text-sm transition-all"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={() => {
+                    onClear?.();
+                    setShowDeleteConfirm(false);
+                  }}
+                  className="flex-1 px-4 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-sm transition-all shadow-lg shadow-red-200"
+                >
+                  Hapus
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
